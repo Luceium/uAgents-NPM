@@ -2,9 +2,21 @@
     "name": "@fetchai/uagents",
     "license": " Apache-2.0",
     "version": "0.0.1",
+    "description": "uAgents is a library developed by Fetch.ai that allows for creating autonomous AI agents in JS/TS. With simple and expressive decorators, you can have an agent that performs various tasks on a schedule or takes action on various events.",
+    "keywords": [
+        "fetchai",
+        "uagents",
+        "agentic",
+        "multiagent",
+        "ai",
+        "networking"
+    ],
     "main": "dist/index.js",
     "module": "dist/index.mjs",
     "types": "dist/index.d.ts",
+    "files": [
+        "dist"
+    ],
     "scripts": {
         "build": "tsup index.ts --format cjs,esm --dts --minify",
         "lint": "tsc"
