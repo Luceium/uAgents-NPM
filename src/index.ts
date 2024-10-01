@@ -1,5 +1,3 @@
-const foo = () => {
-  console.log("foo");
-};
-
-foo();
+export function sum(a: number, b: number): number {
+  return a + b;
+}
