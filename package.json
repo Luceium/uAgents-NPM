@@ -18,7 +18,7 @@
         "dist"
     ],
     "scripts": {
-        "build": "tsup index.ts --format cjs,esm --dts --minify",
+        "build": "tsup src/index.ts --format cjs,esm --dts --minify",
         "lint": "tsc",
         "test": "jest"
     },
