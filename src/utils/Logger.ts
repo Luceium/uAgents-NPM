@@ -11,7 +11,7 @@ export type Logger = {
 };
 
 let maxNameLength = 0;
-const DEFAULT_LOGGER = getLogger(LogLevel.INFO, "uagents");
+let DEFAULT_LOGGER: Logger; // Set on first use such that maxNameLength is not affected by default logger until it's actually used
 
 export function getLogger(logLevel: LogLevel, name: string): Logger {
   if (name.length > maxNameLength) {
@@ -22,11 +22,13 @@ export function getLogger(logLevel: LogLevel, name: string): Logger {
 
 export function log(message: string, logger?: Logger) {
   if (!logger) {
+    if (!DEFAULT_LOGGER) {
+      DEFAULT_LOGGER = getLogger(LogLevel.INFO, "default");
+    }
     logger = DEFAULT_LOGGER;
   }
-  const output = `[${logger.logLevel}\t ${logger.name.padStart(
-    maxNameLength,
-    " "
+  const output = `${logger.logLevel}\t [${logger.name.padStart(
+    maxNameLength
   )}]: ${message}`;
   switch (logger.logLevel) {
     case LogLevel.DEBUG:
