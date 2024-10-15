@@ -1,5 +1,5 @@
 import { jest, describe, expect, it } from "@jest/globals";
-import { getLogger, log, LogLevel } from "../src/utils/Logger";
+import { getLogger, log, LogLevel } from "../src/utils";
 
 describe("log", () => {
   // const getLoggerSpy = jest.spyOn(getLogger);
