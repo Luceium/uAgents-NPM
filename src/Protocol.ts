@@ -1,1 +1,1 @@
-export type Protocol = "tmp";
+export const Protocol = "tmp";
