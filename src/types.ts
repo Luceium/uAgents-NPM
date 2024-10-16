@@ -1,7 +1,5 @@
 import { Context } from "./Context";
 import { Model } from "./model";
-import { z } from "zod";
-import { zodToTs, createTypeAlias } from "zod-to-ts";
 
 // TODO: Export types and classes as needed by other files
 
@@ -14,7 +12,7 @@ type MessageCallback = (
 type EventCallback = (context: Context) => Promise<void>;
 type WalletMessageCallback = (context: Context, message: any) => Promise<void>;
 
-type RestReturnType = { [key: string]: any } | Model;
+type RestReturnType = Model<{ [key: string]: any }>;
 type RestGetHandler = (context: Context) => Promise<RestReturnType | null>;
 type RestPostHandler = (
   context: Context,
@@ -33,8 +31,8 @@ type AgentInfo = {
 type RestHandlerDetails = {
   method: RestMethod;
   endpoint: string;
-  request_model?: Model;
-  response_model: Model;
+  request_model?: Model<any>;
+  response_model: Model<any>;
 };
 
 class AgentGeolocation {
