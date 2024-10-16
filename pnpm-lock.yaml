@@ -14,6 +14,12 @@ importers:
       '@jest/globals':
         specifier: ^29.7.0
         version: 29.7.0
+      zod:
+        specifier: ^3.23.8
+        version: 3.23.8
+      zod-to-ts:
+        specifier: ^1.2.0
+        version: 1.2.0(typescript@5.6.2)(zod@3.23.8)
     devDependencies:
       '@babel/core':
         specifier: ^7.25.8
@@ -2373,6 +2379,15 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
+  zod-to-ts@1.2.0:
+    resolution: {integrity: sha512-x30XE43V+InwGpvTySRNz9kB7qFU8DlyEy7BsSTCHPH1R0QasMmHWZDCzYm6bVXtj/9NNJAZF3jW8rzFvH5OFA==}
+    peerDependencies:
+      typescript: ^4.9.4 || ^5.0.2
+      zod: ^3
+
+  zod@3.23.8:
+    resolution: {integrity: sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==}
+
 snapshots:
 
   '@ampproject/remapping@2.3.0':
@@ -3360,6 +3375,7 @@ snapshots:
   '@fetchai/uagents@file:':
     dependencies:
       '@jest/globals': 29.7.0
+      zod: 3.23.8
     transitivePeerDependencies:
       - supports-color
 
@@ -5120,3 +5136,10 @@ snapshots:
       yargs-parser: 21.1.1
 
   yocto-queue@0.1.0: {}
+
+  zod-to-ts@1.2.0(typescript@5.6.2)(zod@3.23.8):
+    dependencies:
+      typescript: 5.6.2
+      zod: 3.23.8
+
+  zod@3.23.8: {}
