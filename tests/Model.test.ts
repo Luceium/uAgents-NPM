@@ -172,4 +172,8 @@ describe("Model", () => {
     };
     expect(() => model.validate(invalidData)).toThrow();
   });
+
+  it("should throw an error if Model is created without arguments", () => {
+    expect(() => new Model()).toThrow("Invalid input. Provide a Zod schema, example object, or TypeScript type.");
+  });
 });
