@@ -1,5 +1,7 @@
-import { ZodSchema, z } from "zod";
+import { ZodSchema } from "zod";
+import { z } from "./index";
 import crypto from "crypto";
+import { createSchema } from "zod-openapi";
 
 export class Model<T extends Record<string, any>> {
   private schema: ZodSchema;
@@ -17,16 +19,7 @@ export class Model<T extends Record<string, any>> {
   }
 
   dumpJson(data: T): string {
-    console.log(data);
-    // sort keys and stringify with no indent
-    const sortedData = Object.keys(data)
-      .sort()
-      .reduce((acc: { [key: string]: any }, key: string) => {
-        acc[key] = data[key];
-        return acc;
-      }, {});
-    console.log(sortedData, JSON.stringify(sortedData, null, 0));
-    return JSON.stringify(sortedData, null, 0);
+    return JSON.stringify(data, null, 0);
   }
 
   dump(data: T): T {
@@ -34,7 +27,24 @@ export class Model<T extends Record<string, any>> {
   }
 
   buildSchemaDigest(): string {
-    const schemaDef = JSON.stringify(this.schema);
+    const { schema } = createSchema(this.schema, {
+      schemaType: "input",
+      openapi: "3.1.0",
+    });
+    console.log(schema);
+    // sort keys and stringify with no indent
+    const sortedData = Object.keys(schema)
+      .sort()
+      .reduce((acc: { [key: string]: any }, key: string) => {
+        if (typeof schema === "object" && schema !== null && key in schema) {
+          acc[key] = (schema as any)[key];
+        }
+        return acc;
+      }, {});
+
+    const schemaDef = JSON.stringify(sortedData, null, 0);
+    console.log(schemaDef);
+
     const digest = crypto.createHash("sha256").update(schemaDef).digest("hex");
     return `model:${digest}`;
   }
