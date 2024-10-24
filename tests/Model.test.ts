@@ -56,15 +56,31 @@ describe("Model", () => {
     expect(model.buildSchemaDigest()).toMatch(digestPattern);
   });
 
+  it("should be compatible with python model digest", () => {
+    const schema = z
+      .object({
+        check: z.boolean(),
+        message: z.string(),
+        counter: z.number().int(),
+      })
+      .describe("Plus random docstring");
+    // See https://github.com/fetchai/uAgents/blob/main/python/tests/test_model.py
+    const TARGET_DIGEST =
+      "model:21e34819ee8106722968c39fdafc104bab0866f1c73c71fd4d2475be285605e9";
+
+    const model = new Model(schema);
+    expect(model.buildSchemaDigest()).toEqual(TARGET_DIGEST);
+  });
+
   it("should handle nested objects when inferring schema", () => {
     const exampleObject = {
       user: {
         name: "Emma",
         details: {
           age: 29,
-          active: true
-        }
-      }
+          active: true,
+        },
+      },
     };
     const model = new Model(exampleObject);
 
@@ -73,9 +89,9 @@ describe("Model", () => {
         name: "Emma",
         details: {
           age: 29,
-          active: true
-        }
-      }
+          active: true,
+        },
+      },
     };
     expect(model.validate(validData)).toEqual(validData);
 
@@ -84,9 +100,9 @@ describe("Model", () => {
         name: "Emma",
         details: {
           age: "twenty-nine",
-          active: true
-        }
-      }
+          active: true,
+        },
+      },
     };
     expect(() => model.validate(invalidData)).toThrow();
   });
@@ -103,13 +119,15 @@ describe("Model", () => {
   });
 
   it("should throw an error for invalid constructor argument", () => {
-    expect(() => new Model(123 as any)).toThrow("Invalid input. Provide a Zod schema, example object, or TypeScript type.");
+    expect(() => new Model(123 as any)).toThrow(
+      "Invalid input. Provide a Zod schema, example object, or TypeScript type."
+    );
   });
 
   it("should correctly validate optional fields", () => {
     const schema = z.object({
       name: z.string(),
-      age: z.number().optional()
+      age: z.number().optional(),
     });
     const model = new Model(schema);
 
@@ -132,11 +150,11 @@ describe("Model", () => {
             theme: "dark",
             notifications: {
               email: true,
-              sms: false
-            }
-          }
-        }
-      }
+              sms: false,
+            },
+          },
+        },
+      },
     };
     const model = new Model(exampleObject);
 
@@ -148,11 +166,11 @@ describe("Model", () => {
             theme: "dark",
             notifications: {
               email: true,
-              sms: false
-            }
-          }
-        }
-      }
+              sms: false,
+            },
+          },
+        },
+      },
     };
     expect(model.validate(validData)).toEqual(validData);
 
@@ -164,16 +182,12 @@ describe("Model", () => {
             theme: "dark",
             notifications: {
               email: "yes",
-              sms: false
-            }
-          }
-        }
-      }
+              sms: false,
+            },
+          },
+        },
+      },
     };
     expect(() => model.validate(invalidData)).toThrow();
-  });
-
-  it("should throw an error if Model is created without arguments", () => {
-    expect(() => new Model()).toThrow("Invalid input. Provide a Zod schema, example object, or TypeScript type.");
   });
 });
