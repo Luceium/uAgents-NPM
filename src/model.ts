@@ -93,7 +93,7 @@ function pydanticStringify(
 
     console.log("VERIFY NO SIDE EFFECTS", "value", value, "key", key);
     // add default title if missing
-    if ("type" in valueKeys && !("title" in valueKeys)) {
+    if (valueKeys.includes("type") && !valueKeys.includes("title")) {
       console.log("adding title", key);
       // assuming keys are in snake_case
       value.title = key
