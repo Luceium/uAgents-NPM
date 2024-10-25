@@ -32,7 +32,10 @@ describe("Model", () => {
         message: z.string(),
         counter: z.number().int(),
       })
-      .openapi({ description: "Plus random docstring" });
+      .openapi({
+        description: "Plus random docstring",
+        title: "SuperImportantCheck",
+      });
     // See https://github.com/fetchai/uAgents/blob/main/python/tests/test_model.py
     const TARGET_DIGEST =
       "model:21e34819ee8106722968c39fdafc104bab0866f1c73c71fd4d2475be285605e9";
@@ -47,24 +50,39 @@ describe("Model", () => {
       value: z.string(),
     });
 
-    const UAgentResponseType = z.enum([
-      "final",
-      "error",
-      "validation_error",
-      "select_from_options",
-      "final_options",
-    ]);
+    const UAgentResponseType = z
+      .enum([
+        "final",
+        "error",
+        "validation_error",
+        "select_from_options",
+        "final_options",
+      ])
+      .openapi({ description: "An enumeration." });
 
-    const UAgentResponse = z.object({
-      version: z.literal("v1"),
-      type: UAgentResponseType,
-      request_id: z.string().optional(),
-      agent_address: z.string().optional(),
-      message: z.string().optional(),
-      options: z.array(KeyValue).optional(),
-      verbose_message: z.string().optional(),
-      verbose_options: z.array(KeyValue).optional(),
-    });
+    const UAgentResponse = z
+      .object({
+        version: z.literal("v1").openapi({ title: "Version" }),
+        type: UAgentResponseType.openapi({ title: "Type" }),
+        request_id: z.string().optional().openapi({ title: "Request Id" }),
+        agent_address: z
+          .string()
+          .optional()
+          .openapi({ title: "Agent Address" }),
+        message: z.string().optional().openapi({ title: "Message" }),
+        options: z.array(KeyValue).optional().openapi({ title: "Options" }),
+        verbose_message: z
+          .string()
+          .optional()
+          .openapi({ title: "Verbose Message" }),
+        verbose_options: z
+          .array(KeyValue)
+          .optional()
+          .openapi({ title: "Verbose Options" }),
+      })
+      .openapi({
+        title: "UAgentResponse",
+      });
 
     const NESTED_TARGET_DIGEST =
       "model:cf0d1367c5f9ed8a269de559b2fbca4b653693bb8315d47eda146946a168200e";
