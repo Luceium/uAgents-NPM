@@ -1,14 +1,15 @@
-import { ZodSchema } from "zod";
-import { z } from "./index";
+import { z, ZodSchema } from "zod";
 import crypto from "crypto";
-import { createSchema } from "zod-openapi";
+import { extendZodWithOpenApi, generateSchema } from "@anatine/zod-openapi";
+
+extendZodWithOpenApi(z);
 
 export class Model<T extends Record<string, any>> {
   private schema: ZodSchema;
 
   /**
    *
-   * @param schema a zod schema defining attributes, types, contastraints,
+   * @param schema a zod schema defining attributes, types, constraints,
    */
   constructor(schema: ZodSchema<T>) {
     this.schema = schema;
@@ -27,10 +28,7 @@ export class Model<T extends Record<string, any>> {
   }
 
   buildSchemaDigest(): string {
-    const { schema } = createSchema(this.schema, {
-      schemaType: "input",
-      openapi: "3.1.0",
-    });
+    const schema = generateSchema(this.schema);
     console.log(schema);
     // sort keys and stringify with no indent
     const sortedData = Object.keys(schema)

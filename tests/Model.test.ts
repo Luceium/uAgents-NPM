@@ -1,6 +1,9 @@
 import { describe, expect, it } from "@jest/globals";
 import { Model } from "../src/model";
-import { z } from "../src/index";
+import { z } from "zod";
+import { extendZodWithOpenApi, generateSchema } from "@anatine/zod-openapi";
+
+extendZodWithOpenApi(z);
 
 describe("Model", () => {
   it("should create a model with a Zod schema", () => {

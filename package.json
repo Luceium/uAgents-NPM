@@ -35,6 +35,7 @@
         "typescript": "^5.6.2"
     },
     "dependencies": {
+        "@anatine/zod-openapi": "^2.2.6",
         "@fetchai/uagents": "file:",
         "@jest/globals": "^29.7.0",
         "@types/node": "^22.7.5",
