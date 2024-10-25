@@ -1,5 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
-import { Model } from "../src/Model";
+
+import { Model } from "../src/model";
 import { z } from "../src/index";
 
 describe("Model", () => {
@@ -29,7 +30,7 @@ describe("Model", () => {
         message: z.string(),
         counter: z.number().int(),
       })
-      .describe("Plus random docstring");
+      .openapi({ description: "Plus random docstring" });
     // See https://github.com/fetchai/uAgents/blob/main/python/tests/test_model.py
     const TARGET_DIGEST =
       "model:21e34819ee8106722968c39fdafc104bab0866f1c73c71fd4d2475be285605e9";
@@ -45,15 +46,15 @@ describe("Model", () => {
     });
 
     const UAgentResponseType = z.enum([
-      'final',
-      'error',
-      'validation_error',
-      'select_from_options',
-      'final_options'
+      "final",
+      "error",
+      "validation_error",
+      "select_from_options",
+      "final_options",
     ]);
 
     const UAgentResponse = z.object({
-      version: z.literal('v1'),
+      version: z.literal("v1"),
       type: UAgentResponseType,
       request_id: z.string().optional(),
       agent_address: z.string().optional(),
