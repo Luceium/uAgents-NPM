@@ -1,5 +1,4 @@
 import { describe, expect, it } from "@jest/globals";
-
 import { Model } from "../src/model";
 import { z } from "../src/index";
 
@@ -64,7 +63,9 @@ describe("Model", () => {
       verbose_options: z.array(KeyValue).optional(),
     });
 
-    const NESTED_TARGET_DIGEST = "model:cf0d1367c5f9ed8a269de559b2fbca4b653693bb8315d47eda146946a168200e";
+    const NESTED_TARGET_DIGEST =
+      "model:cf0d1367c5f9ed8a269de559b2fbca4b653693bb8315d47eda146946a168200e";
+
     const model = new Model(UAgentResponse);
     expect(model.buildSchemaDigest()).toEqual(NESTED_TARGET_DIGEST);
   });
