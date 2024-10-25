@@ -38,6 +38,36 @@ describe("Model", () => {
     expect(model.buildSchemaDigest()).toEqual(TARGET_DIGEST);
   });
 
+  it("nested models should be compatible with python model digest", () => {
+    const KeyValue = z.object({
+      key: z.string(),
+      value: z.string(),
+    });
+
+    const UAgentResponseType = z.enum([
+      'final',
+      'error',
+      'validation_error',
+      'select_from_options',
+      'final_options'
+    ]);
+
+    const UAgentResponse = z.object({
+      version: z.literal('v1'),
+      type: UAgentResponseType,
+      request_id: z.string().optional(),
+      agent_address: z.string().optional(),
+      message: z.string().optional(),
+      options: z.array(KeyValue).optional(),
+      verbose_message: z.string().optional(),
+      verbose_options: z.array(KeyValue).optional(),
+    });
+
+    const NESTED_TARGET_DIGEST = "model:cf0d1367c5f9ed8a269de559b2fbca4b653693bb8315d47eda146946a168200e";
+    const model = new Model(UAgentResponse);
+    expect(model.buildSchemaDigest()).toEqual(NESTED_TARGET_DIGEST);
+  });
+
   it("should throw an error for invalid constructor argument", () => {
     expect(() => new Model(123 as any)).toThrow(
       "Invalid input. Provide a Zod schema."
