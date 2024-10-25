@@ -4,12 +4,34 @@ import { extendZodWithOpenApi, generateSchema } from "@anatine/zod-openapi";
 
 extendZodWithOpenApi(z);
 
+/**
+ * A wrapper around a zod schemas that provides additional functionality for uAgents.
+ * The model class is used to validate incoming messages to ensure they match the expected schema,
+ * and generate model digests compatible with the python uAgent SDK.
+ */
 export class Model<T extends Record<string, any>> {
   private schema: ZodSchema;
 
   /**
-   *
-   * @param schema a zod schema defining attributes, types, constraints,
+   * Constructor for a uAgent model.
+   * @param schema a zod schema defining attributes, types, constraints, etc.
+   * The schema must include at least one title for the top-level object, using zod-openapi.
+   * zod-openapi titles, types, etc. can be used to add additional metadata to the schema.
+   * @example
+   * ```typescript
+   * const schema = z
+      .object({
+        check: z.boolean(),
+        message: z.string(),
+        counter: z.number().int().openapi({ description: "counts how many times the check has been run" }),
+      })
+      .openapi({
+        description: "Plus random docstring",
+        title: "SuperImportantCheck",
+      });
+   * ```
+   * @see https://zod.dev/ for more information on zod
+   * @see https://github.com/anatine/zod-openapi for more information on zod-openapi
    */
   constructor(schema: ZodSchema<T>) {
     this.schema = schema;
