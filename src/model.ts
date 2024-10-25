@@ -29,21 +29,65 @@ export class Model<T extends Record<string, any>> {
 
   buildSchemaDigest(): string {
     const schema = generateSchema(this.schema);
-    console.log(schema);
-    // sort keys and stringify with no indent
-    const sortedData = Object.keys(schema)
-      .sort()
-      .reduce((acc: { [key: string]: any }, key: string) => {
-        if (typeof schema === "object" && schema !== null && key in schema) {
-          acc[key] = (schema as any)[key];
-        }
-        return acc;
-      }, {});
+    const schemaStr = pydanticStringify(schema);
+    console.log(schemaStr);
 
-    const schemaDef = JSON.stringify(sortedData, null, 0);
-    console.log(schemaDef);
-
-    const digest = crypto.createHash("sha256").update(schemaDef).digest("hex");
+    const digest = crypto
+      .createHash("sha256")
+      .update(schemaStr, "utf8")
+      .digest("hex");
     return `model:${digest}`;
   }
+}
+
+/**
+ * custom stringify to conform to Pydantic json format
+ * Recursively sort keys
+ * Spaces after commas and colons
+ * No newlines
+ * Arrays are left unsorted (May change in the future)
+ * @param obj
+ * @returns
+ */
+function pydanticStringify(
+  obj: { [key: string]: any } | any[] | string | number | boolean
+): string {
+  if (
+    obj === null || // null object
+    (typeof obj !== "object" && !Array.isArray(obj)) || // not an object or array / a primitive
+    Object.keys(obj).length === 0 // empty object
+  ) {
+    return JSON.stringify(obj);
+  }
+
+  if (Array.isArray(obj)) {
+    return "[" + obj.map(pydanticStringify).join(", ") + "]";
+  }
+
+  const sortedKeys = Object.keys(obj).sort();
+  const result = sortedKeys.map((key) => {
+    const value = obj[key];
+    const valueKeys = Object.keys(value);
+
+    console.log("VERIFY NO SIDE EFFECTS", "value", value, "key", key);
+    // add default title if missing
+    if ("type" in valueKeys && !("title" in valueKeys)) {
+      console.log("adding title", key);
+      // assuming keys are in snake_case
+      value.title = key
+        .split("_")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+      console.log("added title", value);
+    }
+    console.log("VERIFY NO SIDE EFFECTS", "value", value, "key", key);
+
+    // unwrap single-element types
+    if (key === "type" && value.length === 1) {
+      return `"type": ${pydanticStringify(value[0])}`;
+    }
+    return `"${key}": ${pydanticStringify(value)}`;
+  });
+
+  return "{" + result.join(", ") + "}";
 }
