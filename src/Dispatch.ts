@@ -4,7 +4,7 @@ import { RestMethod } from './types';
 /**
  * Abstract base class for sinks that handle messages.
  */
-abstract class Sink {
+export abstract class Sink {
   abstract handleMessage(
     sender: string,
     schemaDigest: string,
