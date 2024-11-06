@@ -1,6 +1,10 @@
 import { z, ZodSchema } from "zod";
 import crypto from "crypto";
-import { extendZodWithOpenApi, generateSchema } from "@anatine/zod-openapi";
+import {
+  extendZodWithOpenApi,
+  createSchema,
+  CreateSchemaOptions,
+} from "zod-openapi";
 
 extendZodWithOpenApi(z);
 
@@ -31,7 +35,7 @@ export class Model<T extends Record<string, any>> {
       });
    * ```
    * @see https://zod.dev/ for more information on zod
-   * @see https://github.com/anatine/zod-openapi for more information on zod-openapi
+   * @see https://github.com/samchungy/zod-openapi for more information on zod-openapi
    */
   constructor(schema: ZodSchema<T>) {
     this.schema = schema;
@@ -49,8 +53,14 @@ export class Model<T extends Record<string, any>> {
     return this.schema.parse(data) as T;
   }
 
-  buildSchemaDigest(): string {
-    const schema = generateSchema(this.schema);
+  buildSchemaDigest(components?: Record<string, z.ZodType>): string {
+    const createSchemaOpts: CreateSchemaOptions = {
+      components: components,
+      // componentRefPath: "#/definitions/",
+    };
+    const schema = components
+      ? createSchema(this.schema, createSchemaOpts)
+      : createSchema(this.schema);
     const schemaStr = pydanticStringify(schema);
     console.log(schemaStr);
 
