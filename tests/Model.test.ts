@@ -45,10 +45,12 @@ describe("Model", () => {
   });
 
   it("nested models should be compatible with python model digest", () => {
-    const KeyValue = z.object({
-      key: z.string(),
-      value: z.string(),
-    });
+    const KeyValue = z
+      .object({
+        key: z.string(),
+        value: z.string(),
+      })
+      .openapi({ ref: "KeyValue" });
 
     const UAgentResponseType = z
       .enum([
@@ -58,7 +60,7 @@ describe("Model", () => {
         "select_from_options",
         "final_options",
       ])
-      .openapi({ description: "An enumeration." });
+      .openapi({ description: "An enumeration.", ref: "UAgentResponseType" });
 
     const UAgentResponse = z
       .object({
@@ -88,9 +90,32 @@ describe("Model", () => {
       "model:cf0d1367c5f9ed8a269de559b2fbca4b653693bb8315d47eda146946a168200e";
 
     const model = new Model(UAgentResponse);
-    expect(model.buildSchemaDigest({ KeyValue: KeyValue })).toEqual(
-      NESTED_TARGET_DIGEST
-    );
+    expect(model.buildSchemaDigest()).toEqual(NESTED_TARGET_DIGEST);
+  });
+
+  it.only("test", () => {
+    // const KeyValue = z
+    //   .object({
+    //     key: z.string(),
+    //     value: z.string(),
+    //   })
+    //   .openapi({ ref: "KeyValue" });
+
+    const TestEnum = z
+      .enum(["one", "two", "three"])
+      .openapi({ ref: "TestEnum" });
+
+    const Test = z
+      .object({
+        testEnum: TestEnum,
+        // people: z.array(KeyValue).optional().openapi({ title: "People" }),
+      })
+      .openapi({
+        title: "Test",
+      });
+
+    const model = new Model(Test);
+    model.buildSchemaDigest();
   });
 
   it("should throw an error for invalid constructor argument", () => {

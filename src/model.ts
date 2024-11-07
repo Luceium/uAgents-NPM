@@ -38,6 +38,10 @@ export class Model<T extends Record<string, any>> {
    * @see https://github.com/samchungy/zod-openapi for more information on zod-openapi
    */
   constructor(schema: ZodSchema<T>) {
+    // check that the schema is a zod schema
+    if (!schema || !(schema instanceof z.ZodType)) {
+      throw new Error("Invalid input. Provide a Zod schema.");
+    }
     this.schema = schema;
   }
 
@@ -53,15 +57,13 @@ export class Model<T extends Record<string, any>> {
     return this.schema.parse(data) as T;
   }
 
-  buildSchemaDigest(components?: Record<string, z.ZodType>): string {
-    const createSchemaOpts: CreateSchemaOptions = {
-      components: components,
-      // componentRefPath: "#/definitions/",
-    };
-    const schema = components
-      ? createSchema(this.schema, createSchemaOpts)
-      : createSchema(this.schema);
-    const schemaStr = pydanticStringify(schema);
+  buildSchemaDigest(): string {
+    const { components, schema } = createSchema(this.schema);
+    console.log(components);
+    let schemaJSON = components
+      ? { definitions: { ...components }, ...schema }
+      : schema;
+    const schemaStr = pydanticStringify(schemaJSON);
     console.log(schemaStr);
 
     const digest = crypto
@@ -101,18 +103,25 @@ function pydanticStringify(
     const value = obj[key];
     const valueKeys = Object.keys(value);
 
-    console.log("VERIFY NO SIDE EFFECTS", "value", value, "key", key);
+    // console.log("VERIFY NO SIDE EFFECTS", "value", value, "key", key);
     // add default title if missing
     if (valueKeys.includes("type") && !valueKeys.includes("title")) {
-      console.log("adding title", key);
+      // console.log("adding title", key);
       // assuming keys are in snake_case
       value.title = key
         .split("_")
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
         .join(" ");
-      console.log("added title", value);
+      // console.log("added title", value);
     }
-    console.log("VERIFY NO SIDE EFFECTS", "value", value, "key", key);
+    // console.log("VERIFY NO SIDE EFFECTS", "value", value, "key", key);
+
+    if (key === "$ref") {
+      return `"${key}": "${value.replace(
+        "components/schemas",
+        "definitions"
+      )}"`;
+    }
 
     // unwrap single-element types
     if (key === "type" && value.length === 1) {
