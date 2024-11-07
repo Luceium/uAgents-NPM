@@ -16,3 +16,28 @@ Note that it is important and slightly difficult to make `Model`s that are compa
 | Python  | NPM  |
 | ------- | ---- |
 | Literal | Enum |
+
+### Other Quirks
+If you use `.openapi()` and chain it, the last one will override the others.
+Example:
+```typescript
+const A = z.string().openapi({ref: "A"})
+const B = z.object({
+    a: A.openapi({description: "This is a ref"})
+})
+
+const model = new Model(B);
+console.log(Model.dumpJson(model))
+```
+This will result in the ref being overriden.
+Instead do this to prevent overriding:
+```typescript
+const A = z.string().openapi({ref: "A"})
+const B = z.object({
+    a: A.refine(x => true).openapi({description: "This is a ref"})
+})
+
+const model = new Model(B);
+console.log(Model.dumpJson(model))
+```
+Refine takes in a lambda to apply any constraints. We return true to leave no change. Effectively we add a no op between the `.openapi()` calls
