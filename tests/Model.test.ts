@@ -1,7 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
 import { Model } from "../src/model";
 import { z } from "zod";
-import { extendZodWithOpenApi } from "zod-openapi";
+import { createSchema, extendZodWithOpenApi } from "zod-openapi";
 
 extendZodWithOpenApi(z);
 
@@ -44,7 +44,7 @@ describe("Model", () => {
     expect(model.buildSchemaDigest()).toEqual(TARGET_DIGEST);
   });
 
-  it("nested models should be compatible with python model digest", () => {
+  it.only("nested models should be compatible with python model digest", () => {
     const KeyValue = z
       .object({
         key: z.string(),
@@ -60,12 +60,18 @@ describe("Model", () => {
         "select_from_options",
         "final_options",
       ])
-      .openapi({ description: "An enumeration.", ref: "UAgentResponseType" });
+      .openapi({
+        title: "UAgentResponseType",
+        description: "An enumeration.",
+        ref: "UAgentResponseType",
+      });
 
     const UAgentResponse = z
       .object({
-        version: z.literal("v1").openapi({ title: "Version" }),
-        type: UAgentResponseType.openapi({ title: "Type" }),
+        version: z.enum(["v1"]).default("v1").openapi({ title: "Version" }),
+        type: UAgentResponseType.refine((val) => true).openapi({
+          title: "Type",
+        }),
         request_id: z.string().optional().openapi({ title: "Request Id" }),
         agent_address: z
           .string()
@@ -89,33 +95,18 @@ describe("Model", () => {
     const NESTED_TARGET_DIGEST =
       "model:cf0d1367c5f9ed8a269de559b2fbca4b653693bb8315d47eda146946a168200e";
 
+    // Check that all refs are added to components
+
+    const { schema, components } = createSchema(UAgentResponse);
+    console.log("schema: ", schema);
+    console.log("components: ", components);
+    expect(Object.keys(components || {})).toEqual(
+      expect.arrayContaining(["KeyValue", "UAgentResponseType"])
+    );
+
+    // verify digest matches
     const model = new Model(UAgentResponse);
     expect(model.buildSchemaDigest()).toEqual(NESTED_TARGET_DIGEST);
-  });
-
-  it.only("test", () => {
-    // const KeyValue = z
-    //   .object({
-    //     key: z.string(),
-    //     value: z.string(),
-    //   })
-    //   .openapi({ ref: "KeyValue" });
-
-    const TestEnum = z
-      .enum(["one", "two", "three"])
-      .openapi({ ref: "TestEnum" });
-
-    const Test = z
-      .object({
-        testEnum: TestEnum,
-        // people: z.array(KeyValue).optional().openapi({ title: "People" }),
-      })
-      .openapi({
-        title: "Test",
-      });
-
-    const model = new Model(Test);
-    model.buildSchemaDigest();
   });
 
   it("should throw an error for invalid constructor argument", () => {

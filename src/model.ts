@@ -58,8 +58,11 @@ export class Model<T extends Record<string, any>> {
   }
 
   buildSchemaDigest(): string {
-    const { components, schema } = createSchema(this.schema);
-    console.log(components);
+    let ops: CreateSchemaOptions;
+    const { components, schema } = createSchema(this.schema, {
+      componentRefPath: "#/definitions/",
+    });
+    console.log(schema, components);
     let schemaJSON = components
       ? { definitions: { ...components }, ...schema }
       : schema;
@@ -115,13 +118,6 @@ function pydanticStringify(
       // console.log("added title", value);
     }
     // console.log("VERIFY NO SIDE EFFECTS", "value", value, "key", key);
-
-    if (key === "$ref") {
-      return `"${key}": "${value.replace(
-        "components/schemas",
-        "definitions"
-      )}"`;
-    }
 
     // unwrap single-element types
     if (key === "type" && value.length === 1) {
