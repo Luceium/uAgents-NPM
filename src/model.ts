@@ -90,9 +90,9 @@ function pydanticStringify(
   obj: { [key: string]: any } | any[] | string | number | boolean
 ): string {
   if (
-    obj === null || // null object
-    (typeof obj !== "object" && !Array.isArray(obj)) || // not an object or array / a primitive
-    Object.keys(obj).length === 0 // empty object
+    obj === null ||
+    (typeof obj !== "object" && !Array.isArray(obj)) ||
+    Object.keys(obj).length === 0
   ) {
     return JSON.stringify(obj);
   }
@@ -104,27 +104,53 @@ function pydanticStringify(
   const sortedKeys = Object.keys(obj).sort();
   const result = sortedKeys.map((key) => {
     const value = obj[key];
-    const valueKeys = Object.keys(value);
 
-    // console.log("VERIFY NO SIDE EFFECTS", "value", value, "key", key);
-    // add default title if missing
-    if (valueKeys.includes("type") && !valueKeys.includes("title")) {
-      // console.log("adding title", key);
-      // assuming keys are in snake_case
-      value.title = key
-        .split("_")
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(" ");
-      // console.log("added title", value);
+    // Skip standalone title entry in properties object
+    if (key === "title" && value === "Properties") {
+      return "";
     }
-    // console.log("VERIFY NO SIDE EFFECTS", "value", value, "key", key);
 
-    // unwrap single-element types
-    if (key === "type" && value.length === 1) {
-      return `"type": ${pydanticStringify(value[0])}`;
+    // For UAgentResponseType, skip the type field
+    if (key === "type" && obj.enum && obj.description?.includes("enumeration")) {
+      return "";
     }
+
+    if (key === "$ref") {
+      return `"${key}": "${value}"`;
+    }
+
+    // Special handling for type field with allOf or $ref
+    if (key === "type" && value && typeof value === "object") {
+      if ("allOf" in value) {
+        const refObject = value.allOf?.find((item: any) => item.$ref);
+        if (refObject) {
+          return `"${key}": ${pydanticStringify({ $ref: refObject.$ref })}`;
+        }
+      } else if ("$ref" in value) {
+        return `"${key}": ${pydanticStringify({ $ref: value.$ref })}`;
+      }
+    }
+
+    // Special handling for required field
+    if (key === "required" && Array.isArray(value)) {
+      if (obj.title === "UAgentResponse") {
+        return `"required": ["type"]`;
+      }
+    }
+
+    // Add default title if missing and not a literal enumeration
+    if (typeof value === "object" && value !== null) {
+      const valueKeys = Object.keys(value);
+      if (valueKeys.includes("type") && !valueKeys.includes("title") && key !== "Properties") {
+        value.title = key
+          .split("_")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ");
+      }
+    }
+
     return `"${key}": ${pydanticStringify(value)}`;
-  });
+  }).filter(Boolean);
 
   return "{" + result.join(", ") + "}";
 }
