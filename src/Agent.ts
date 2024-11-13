@@ -407,57 +407,105 @@ export class Agent extends Sink {
     }
   }
 
+  /**
+    * Get the name of the agent.
+    *
+    * @returns {string} The name of the agent.
+    */
   get name(): string {
     return this._name || this.address.slice(0, 16);
   }
 
+  /**
+    * Get the address of the agent used for communication.
+    *
+    * @returns {string} The agent's address.
+    */
   get address(): string {
     return this._identity.getAddress;
   }
 
+  /**
+    * Get the Agent Identifier, including network prefix and address.
+    *
+    * @returns {string} The agent's identifier.
+    */
   get identifier(): string {
     const prefix = this._test ? TESTNET_PREFIX : MAINNET_PREFIX;
     return `${prefix}://${this._identity.getAddress}`;
   }
 
+  /**
+   * Get the wallet of the agent.
+   *
+   * @returns {LocalWallet} The agent's wallet.
+   */
   // get wallet(): LocalWallet {
   //   return this._wallet;
   // }
 
+  /**
+   * Get the ledger client used by the agent.
+   *
+   * @returns {LedgerClient} The agent's ledger client.
+   */
   // get ledger(): LedgerClient {
   //   return this._ledger;
   // }
 
+  /**
+    * Get the key-value store used by the agent for data storage.
+    *
+    * @returns {KeyValueStore} The key-value store instance.
+    */
   get storage(): KeyValueStore {
     return this._storage;
   }
 
+  /**
+    * Get the mailbox configuration of the agent.
+    *
+    * Returns:
+    * Agentverse overrides it but mailbox is kept for backwards compatibility.
+    *
+    * @returns {string | {[key:string]:string|boolean|null}} The mailbox configuration.
+    */
   get mailbox(): string | { [key: string]: string | boolean | null } {
     return this._agentverse;
   }
 
+  /**
+  * Get the mailbox client used by the agent for mailbox communication.
+  *
+  * @returns {MailboxClient | undefined} The mailbox client instance or `undefined`.
+  */
   get mailboxClient(): MailboxClient | null {
     return this._mailboxClient;
   }
 
+  /**
+   * Get the agentverse configuration of the agent.
+   *
+   * @returns {string | { [key: string]: string | boolean | null }} The agentverse configuration.
+   */
   get agentverse(): string | { [key: string]: string | boolean | null } {
     return this._agentverse;
   }
 
-
-  set mailbox(config: string | { [key: string]: string | boolean | null }) {
-    this._agentverse = parseAgentverseConfig(config);
-  }
-
-  set agentverse(config: string | { [key: string]: string | boolean | null }) {
-    this._agentverse = parseAgentverseConfig(config);
-  }
-
-
+  /**
+   * Get the balance of the agent.
+   *
+   * @returns {number} The agent's bank balance.
+   */
   // get balance(): number {
   //   return this.ledger.queryBankBalance(new Address(this.wallet.address()));
   // }
 
+  /**
+   * Get basic information about the agent.
+   *
+   * @returns {AgentInfo} The agent's address, endpoints, protocols, and metadata.
+   */
   get info(): AgentInfo {
     return {
       agent_address: this.address,
@@ -466,8 +514,32 @@ export class Agent extends Sink {
     }
   }
 
+  /**
+   * Get metadata associated with the agent.
+   *
+   * @returns {{ [key: string]: any }} Metadata associated with the agent.
+   */
   get metadata(): { [key: string]: any } {
     return this._metadata;
+  }
+
+  /**
+   * Set a new mailbox configuration for the agent.
+   * Agentverse overrides it but it's kept for backwards compatibility.
+   *
+   * @param {string | { [key: string]: string }} config - New mailbox configuration.
+   */
+  set mailbox(config: string | { [key: string]: string | boolean | null }) {
+    this._agentverse = parseAgentverseConfig(config);
+  }
+
+  /**
+   * Set a new agentverse configuration for the agent.
+   *
+   * @param {string | { [key: string]: string }} config - New AgentVerse configuration.
+   */
+  set agentverse(config: string | { [key: string]: string | boolean | null }) {
+    this._agentverse = parseAgentverseConfig(config);
   }
 
   async handleMessage(sender: string, schemaDigest: string, message: string, session: string): Promise<void> {
