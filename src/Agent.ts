@@ -176,6 +176,12 @@ export class AgentRepresentation {
   }
 }
 
+/**
+ * An agent that interacts within a communication environment.
+ *
+ * @class Agent
+ * @extends Sink
+ */
 export class Agent extends Sink {
   private _agentverse: string | { [key: string]: string | boolean | null };
   private _almanacApiUrl: string | null = null;
@@ -214,6 +220,26 @@ export class Agent extends Sink {
   // private wallet: any; // TODO: set wallet type to Wallet options
   // public protocols: { [key: string]: Protocol } = {};
 
+  /**
+    * Initializes an Agent instance.
+    *
+    * @param {string | null} name - The name of the agent.
+    * @param {number} port - The port on which the agent's server will run.
+    * @param {string | null} seed - The seed for generating keys.
+    * @param {string | string[] | { [key: string]: any } | null} endpoint - The endpoint configuration.
+    * @param {string | { [key: string]: any } | null} agentverse - The agentverse configuration.
+    * @param {string | { [key: string]: string } | null} mailbox - The mailbox configuration.
+    * @param {Resolver | null} resolve - The resolver to use for agent communication.
+    * @param {AgentRegistrationPolicy | null} registrationPolicy - Registration policy for agents.
+    * @param {boolean | { [key: string]: string }} enableWalletMessaging - Whether to enable wallet messaging. If '{"chain_id": CHAIN_ID}' is provided, this sets the chain ID for messaging server.
+    * @param {number} walletKeyDerivationIndex - Index used for deriving wallet key (default is `0`).
+    * @param {number | null} maxResolverEndpoints - Maximum number of endpoints to resolve (optional).
+    * @param {string | null} version - Version of the agent (optional).
+    * @param {boolean} test - True if the agent will register and transact on the testnet (default is `true`).
+    * @param {any | null} loop - Event loop to use (optional).
+    * @param {LogLevel} logLevel - Logging level for the agent (default is `INFO`).
+    * @param {boolean} enableAgentInspector - Enable REST endpoints for debugging (default is `true`).
+    */
   constructor(
     name: string | null = null,
     port: number = 8000,
@@ -291,7 +317,7 @@ export class Agent extends Sink {
       almanacApiUrl: this._almanacApiUrl
     });
 
-    // this.initializeMetadata(metadata) // TODO: create initializeMetadata()
+    this.initializeMetadata(metadata)
     // this.initializeWalletMessaging(enableWalletMessaging) // TODO: create initializeWalletMessaging()
 
     // initialize the internal agent protocol
@@ -365,8 +391,20 @@ export class Agent extends Sink {
     // TODO
   }
 
-  private initializeMetadata(): void {
-    // TODO
+  private initializeMetadata(metadata: { [key: string]: any } | null): { [key: string]: any } {
+    if (!metadata) {
+      return {};
+    }
+
+    try {
+      // TODO: modify this after model class is finished
+      // const model = AgentMetadata.validate(metadata);
+      // const validatedMetadata = model.modelDump({ excludeUnset: true });
+      // return validatedMetadata;
+      return {}
+    } catch (e) {
+      throw e;
+    }
   }
 
   get name(): string {
