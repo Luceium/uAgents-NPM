@@ -218,7 +218,7 @@ export class Agent extends Sink {
   private _useMailbox: boolean = false
   private _version: string;
   // private wallet: any; // TODO: set wallet type to Wallet options
-  // public protocols: { [key: string]: Protocol } = {};
+  public protocols: { [key: string]: Protocol } = {};
 
   /**
     * Initializes an Agent instance.
@@ -352,7 +352,7 @@ export class Agent extends Sink {
       return {
         agent_address: this.address,
         endpoints: this._endpoints,
-        protocols: Object.keys({}), // TODO: replace Object.keys({}) with  Object.keys(this.protocols)
+        protocols: Object.keys(this.protocols),
       };
     });
 
@@ -436,17 +436,35 @@ export class Agent extends Sink {
     return this._agentverse;
   }
 
-  get agentverse(): string | { [key: string]: string | boolean | null } {
-    return this._agentverse;
-  }
-
   get mailboxClient(): MailboxClient | null {
     return this._mailboxClient;
   }
 
+  get agentverse(): string | { [key: string]: string | boolean | null } {
+    return this._agentverse;
+  }
+
+
+  set mailbox(config: string | { [key: string]: string | boolean | null }) {
+    this._agentverse = parseAgentverseConfig(config);
+  }
+
+  set agentverse(config: string | { [key: string]: string | boolean | null }) {
+    this._agentverse = parseAgentverseConfig(config);
+  }
+
+
   // get balance(): number {
   //   return this.ledger.queryBankBalance(new Address(this.wallet.address()));
   // }
+
+  get info(): AgentInfo {
+    return {
+      agent_address: this.address,
+      endpoints: this._endpoints,
+      protocols: Object.keys(this.protocols)
+    }
+  }
 
   get metadata(): { [key: string]: any } {
     return this._metadata;
