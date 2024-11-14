@@ -1,4 +1,4 @@
-import { z, ZodError } from 'zod';
+import { z } from 'zod';
 
 import axios from 'axios';
 
@@ -25,7 +25,7 @@ import { Identity, deriveKeyFromSeed, isUserAddress } from './crypto';
 import { Sink, dispatcher } from './Dispatch';
 import { EnvelopeHistory, EnvelopeHistoryEntry } from './Envelope';
 import { MailboxClient } from './Mailbox';
-import { ErrorMessage, Model } from './model'; // ErrorMessage will just be a string
+import { Model } from './model';
 import { InsufficientFundsError, getAlmanacContract, getLedger } from './Network';
 import { Protocol } from './Protocol';
 import {
@@ -108,9 +108,9 @@ async function delay(coroutine: () => Promise<void>, delaySeconds: number): Prom
 async function sendErrorMessage(
   ctx: Context,
   destination: string,
-  msg: ErrorMessage
+  msg: string
 ): Promise<void> {
-  await ctx.send(destination, msg);
+  // await ctx.send(destination, msg);
 }
 
 /**
@@ -186,11 +186,14 @@ export class Agent extends Sink {
   private _agentverse: string | { [key: string]: string | boolean | null };
   private _almanacApiUrl: string | null = null;
   private _almanacContract: any; // not sure of type
+  private _backgroundTasks: Set<any> = new Set();
+  // private _ctx: Context;
   private _dispatcher = dispatcher
   // private _dispenser = new Dispenser(msgCacheRef=self._messageCache)
-  private _enableAgentInspector: boolean;
+  private _enableAgentInspector!: boolean;
   private _endpoints: AgentEndpoint[];
   private _identity!: Identity;
+  private _intervalMessages: Set<string> = new Set();
   private _intervalHandlers: Array<[Function, number]> = [];
   private _ledger: any; // not sure of type
   private _logger: Logger;
@@ -199,12 +202,12 @@ export class Agent extends Sink {
   private _messageCache: EnvelopeHistory = new EnvelopeHistory();
   private _messageQueue: any; // TODO: default value of messageQueue was asyncio.Queue(); not sure what this is right now
   private _metadata!: { [key: string]: any };
-  // private _models: { [key: string]: Model } = {}
+  private _models: { [key: string]: Model<any> } = {}
   private _name: string | null;
   private _onStartup = []
   private _onShutdown = []
   private _port: number;
-  // private _protocol: Protocol;
+  // private _protocol!: Protocol;
   private _queries: { [key: string]: any } = {} // TODO: values are of type asyncio.Future; not sure what this is right now
   private _registrationPolicy: AgentRegistrationPolicy;
   // private _replies: { [key: string]: { [key: string]: Model }} = {}
@@ -213,7 +216,7 @@ export class Agent extends Sink {
   private _server: ASGIServer;
   private _signedMessageHandlers: { [key: string]: Function } = {};
   private _storage: KeyValueStore;
-  private _test: boolean;
+  private _test!: boolean;
   private _unsignedMessageHandlers: { [key: string]: Function } = {};
   private _useMailbox: boolean = false
   private _version: string;
@@ -397,11 +400,15 @@ export class Agent extends Sink {
     }
 
     try {
-      // TODO: modify this after model class is finished
-      // const model = AgentMetadata.validate(metadata);
-      // const validatedMetadata = model.modelDump({ excludeUnset: true });
-      // return validatedMetadata;
-      return {}
+      const AgentMetadataSchema = z.object({
+        geolocation: z.object({
+          latitude: z.number().optional(),
+          longitude: z.number().optional(),
+        }).optional(),
+      }).catchall(z.any()); // allows extra fields, mirrors extra="allow" in Pydantic
+
+      const validatedMetadata = AgentMetadataSchema.parse(metadata);
+      return validatedMetadata;
     } catch (e) {
       throw e;
     }
@@ -540,6 +547,122 @@ export class Agent extends Sink {
    */
   set agentverse(config: string | { [key: string]: string | boolean | null }) {
     this._agentverse = parseAgentverseConfig(config);
+  }
+
+  /**
+   * Sign the provided data.
+   * @param data - The data to be signed.
+   * @returns The signature of the data.
+   */
+  private sign(data: Uint8Array): string {
+    return this._identity.sign(Buffer.from(data));
+  }
+
+  /**
+   * Sign the provided digest.
+   * @param digest - The digest to be signed.
+   * @returns The signature of the digest.
+   */
+  private signDigest(digest: Uint8Array): string {
+    return this._identity.signDigest(Buffer.from(digest));
+  }
+
+  /**
+   * Sign the registration data for Almanac contract.
+   * @param timestamp - The timestamp for the registration.
+   * @param senderWalletAddress - The wallet address of the transaction sender (optional).
+   * @returns The signature of the registration data.
+   * @throws Error if the Almanac contract is not set.
+   */
+  private signRegistration(timestamp: number, senderWalletAddress: string | null = null): string {
+    const senderAddress = senderWalletAddress || this.wallet.address();
+
+    if (!this._almanacContract) {
+      throw new Error("Almanac contract is not set.");
+    }
+
+    return this._identity.signRegistration(
+      String(this._almanacContract.address),
+      timestamp,
+      senderAddress
+    );
+  }
+
+  /**
+   * Update the list of endpoints.
+   * @param endpoints - List of endpoint dictionaries.
+   */
+  private updateEndpoints(endpoints: AgentEndpoint[]): void {
+    this._endpoints = endpoints;
+  }
+
+  /**
+   * Update the event loop.
+   * @param loop - The event loop (type can be refined based on your implementation).
+   */
+  private updateLoop(loop: any): void {
+    this._loop = loop;
+  }
+
+  /**
+   * Update the queries attribute.
+   * @param queries - The queries attribute (adjust type as needed).
+   */
+  private updateQueries(queries: { [key: string]: any }): void {
+    this._queries = queries;
+  }
+
+  /**
+   * Update the registration policy.
+   * @param policy - The registration policy.
+   */
+  private updateRegistrationPolicy(policy: AgentRegistrationPolicy): void {
+    this._registrationPolicy = policy;
+  }
+
+
+  /**
+   * Register with the Almanac contract.
+   *
+   * This method checks for registration conditions and performs registration if necessary.
+   * @throws Error if the agent has no registration policy.
+   */
+  private async register(): Promise<void> {
+    if (!this._registrationPolicy) {
+      throw new Error("Agent has no registration policy");
+    }
+
+    await this._registrationPolicy.register(
+      this.address,
+      Object.keys(this.protocols),
+      this._endpoints,
+      this._metadata
+    );
+  }
+
+  /**
+   * Execute the registration loop.
+   *
+   * This method registers with the Almanac contract and schedules the next registration.
+   */
+  private async _scheduleRegistration(): Promise<void> {
+    let timeUntilNextRegistration = REGISTRATION_UPDATE_INTERVAL_SECONDS;
+
+    try {
+      await this.register();
+    } catch (error) {
+      if (error instanceof InsufficientFundsError) {
+        timeUntilNextRegistration = 2 * AVERAGE_BLOCK_INTERVAL;
+      } else {
+        log(`Failed to register`, this._logger);
+        timeUntilNextRegistration = REGISTRATION_RETRY_INTERVAL_SECONDS;
+      }
+    }
+
+    // Schedule the next registration update
+    this._loop.createTask(
+      delay(() => this._scheduleRegistration(), timeUntilNextRegistration)
+    );
   }
 
   async handleMessage(sender: string, schemaDigest: string, message: string, session: string): Promise<void> {
