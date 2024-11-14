@@ -37,7 +37,11 @@
     "dependencies": {
         "@fetchai/uagents": "file:",
         "@jest/globals": "^29.7.0",
+        "@types/elliptic": "^6.4.18",
         "@types/node": "^22.7.5",
+        "bech32": "^2.0.0",
+        "elliptic": "^6.6.0",
+        "js-sha256": "^0.11.0",
         "zod": "^3.23.8",
         "zod-openapi": "^3.3.0",
         "zod-to-ts": "^1.2.0"

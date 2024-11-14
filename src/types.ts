@@ -1,34 +1,32 @@
 import { Context } from "./Context";
 import { Model } from "./model";
 
-// TODO: Export types and classes as needed by other files
-
-type IntervalCallback = (context: Context) => Promise<void>;
-type MessageCallback = (
+export type IntervalCallback = (context: Context) => Promise<void>;
+export type MessageCallback = (
   context: Context,
   sender: string,
   recoveredMessage: any
 ) => Promise<void>;
-type EventCallback = (context: Context) => Promise<void>;
-type WalletMessageCallback = (context: Context, message: any) => Promise<void>;
+export type EventCallback = (context: Context) => Promise<void>;
+export type WalletMessageCallback = (context: Context, message: any) => Promise<void>;
 
-type RestReturnType = Model<{ [key: string]: any }>;
-type RestGetHandler = (context: Context) => Promise<RestReturnType | null>;
-type RestPostHandler = (
+export type RestReturnType = Model<{ [key: string]: any }>;
+export type RestGetHandler = (context: Context) => Promise<RestReturnType | null>;
+export type RestPostHandler = (
   context: Context,
   data: any
 ) => Promise<RestReturnType | null>;
-type RestHandler = RestGetHandler | RestPostHandler;
-type RestMethod = "GET" | "POST";
-type RestHandlerMap = { [key: string]: RestHandler }; // where key is in the format of "GET /path" or "POST /path"
+export type RestHandler = RestGetHandler | RestPostHandler;
+export type RestMethod = "GET" | "POST";
+export type RestHandlerMap = { [key: string]: RestHandler }; // where key is in the format of "GET /path" or "POST /path"
 
-type AgentEndpoint = { url: string; weight: number };
-type AgentInfo = {
+export type AgentEndpoint = { url: string; weight: number };
+export type AgentInfo = {
   agent_address: string;
   endpoints: AgentEndpoint[];
   protocols: string[];
 };
-type RestHandlerDetails = {
+export type RestHandlerDetails = {
   method: RestMethod;
   endpoint: string;
   request_model?: Model<any>;
@@ -63,7 +61,7 @@ class AgentGeolocation {
  * Additional fields will simply be passed through.
  * @prop {AgentGeolocation} geolocation The geolocation of the agent.
  */
-type AgentMetadata = {
+export type AgentMetadata = {
   geolocation?: AgentGeolocation;
   [key: string]: any;
 };
@@ -82,7 +80,7 @@ enum DeliveryStatus {
  * @prop {any} message The message content.
  * @prop {string} schema_digest The schema digest of the message.
  */
-type MsgDigest = {
+export type MsgDigest = {
   message: any;
   schema_digest: string;
 };
@@ -95,7 +93,7 @@ type MsgDigest = {
  * @prop {string} endpoint The endpoint the message was sent to.
  * @prop {string | null} session The session ID of the message. Should be a valid UUID
  */
-type MsgStatus = {
+export type MsgStatus = {
   status: DeliveryStatus;
   detail: string;
   destination: string;
