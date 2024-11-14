@@ -44,7 +44,7 @@ describe("Model", () => {
     expect(model.buildSchemaDigest()).toEqual(TARGET_DIGEST);
   });
 
-  it.skip("nested models should be compatible with python model digest", () => {
+  it("nested models should be compatible with python model digest", () => {
     const KeyValue = z
       .object({
         key: z.string(),
