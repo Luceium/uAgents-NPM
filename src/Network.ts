@@ -206,7 +206,7 @@ export class AlmanacContract {
    * @returns The query response
    * @throws Error if the contract address is not set or the query fails
    */
-  private async queryContract(queryMsg: Record<string, any>): Promise<any> {
+  public async queryContract(queryMsg: Record<string, any>): Promise<any> {
     try {
       const response = await this.client.queryContractSmart(this.address, queryMsg);
       if (typeof response !== 'object') {
@@ -534,7 +534,7 @@ export class NameServiceContract {
    * @returns The query response
    * @throws Error if the contract address is not set or the query fails
    */
-  private async queryContract(queryMsg: Record<string, any>): Promise<any> {
+  public async queryContract(queryMsg: Record<string, any>): Promise<any> {
     try {
       const response = await this.client.queryContractSmart(this.address, queryMsg);
       if (typeof response !== 'object') {

@@ -7,7 +7,7 @@ import {
   TESTNET_PREFIX
 } from './Config';
 import { isUserAddress } from './crypto';
-import { getAlmanacContract, getNameServiceContract } from './network';
+import { getAlmanacContract, getNameServiceContract } from './Network';
 import { getLogger, Logger, LogLevel, log } from './utils';
 
 const logger: Logger = getLogger(LogLevel.WARN, "resolver")
@@ -114,7 +114,12 @@ function parseIdentifier(identifier: string): [string, string, string] {
  * @returns {Promise<any>} The query result as a Promise.
  */
 async function queryRecord(agentAddress: string, service: string, test: boolean): Promise<any> {
-	const contract = getAlmanacContract(test);
+	const contract = await getAlmanacContract(test);
+
+	if (!contract) {
+		log(`Failed to get Almanac contract for ${test ? 'testnet' : 'mainnet'}`);
+    throw new Error(`Failed to get Almanac contract for ${test ? 'testnet' : 'mainnet'}`);
+	}
 
 	const queryMsg = {
 		query_record: {
@@ -123,7 +128,7 @@ async function queryRecord(agentAddress: string, service: string, test: boolean)
 		}
 	};
 
-	const result = await contract.query(queryMsg);
+	const result = await contract.queryContract(queryMsg);
 	return result;
 }
 
@@ -141,7 +146,13 @@ async function getAgentAddress(name: string, test: boolean): Promise<string | nu
 		},
 	};
 
-	const result = await getNameServiceContract(test).query(queryMsg);
+	const nameServiceContract = await getNameServiceContract(test);
+	const result = await nameServiceContract.queryContract(queryMsg);
+	
+	if (!result) {
+		log(`Failed to get NameService contract for ${test ? 'testnet' : 'mainnet'}`);
+    throw new Error(`Failed to get NameService contract for ${test ? 'testnet' : 'mainnet'}`);
+	}
 
 	if (result.record !== null) {
 		const registeredRecords = result.record.records[0]?.agent_address?.records || [];
