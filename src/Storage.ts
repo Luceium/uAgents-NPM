@@ -175,4 +175,4 @@ function getOrCreatePrivateKeys(name: string): [string, string] {
   return [identityKey, walletKey];
 }
 
-export const Storage = new KeyValueStore("tmp");
+export { KeyValueStore };
