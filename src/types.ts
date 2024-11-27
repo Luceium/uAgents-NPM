@@ -69,7 +69,7 @@ export type AgentMetadata = {
 /**
  * Delivery Status of a message
  */
-enum DeliveryStatus {
+export enum DeliveryStatus {
   SENT = "sent",
   DELIVERED = "delivered",
   FAILED = "failed",

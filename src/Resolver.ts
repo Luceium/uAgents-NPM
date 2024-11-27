@@ -331,5 +331,6 @@ export {
   AlmanacApiResolver,
   NameServiceResolver,
   GlobalResolver,
+	Resolver,
   RulesBasedResolver
 }

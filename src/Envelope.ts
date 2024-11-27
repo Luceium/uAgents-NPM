@@ -1,5 +1,6 @@
 import { Identity } from './crypto';
 import { sha256 } from 'js-sha256';
+import { z } from 'zod';
 
 /**
  * Represents an envelope for message communication between agents.
@@ -140,6 +141,29 @@ export class Envelope {
     }
     
     return Buffer.from(hasher.digest());
+  }
+
+  /**
+   * Validate the envelope data against the Envelope schema.
+   * 
+   * @param data The data to be validated.
+   * @returns A new Envelope instance if the data is valid.
+   */
+  static modelValidate(data: unknown): Envelope {
+    const EnvelopeSchema = z.object({
+      version: z.number(),
+      sender: z.string(),
+      target: z.string(),
+      session: z.string(),
+      schemaDigest: z.string(),
+      protocolDigest: z.string().optional(),
+      payload: z.string().optional(),
+      expires: z.number().optional(),
+      nonce: z.number().optional(),
+      signature: z.string().optional(),
+    });
+    const parsedData = EnvelopeSchema.parse(data);
+    return new Envelope(parsedData);
   }
 }
 
