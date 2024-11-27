@@ -57,9 +57,13 @@ export class Model<T extends Record<string, any>> {
     return this.schema.parse(data) as T;
   }
 
-  static buildSchemaDigest(schema: ZodSchema): string {
+  static buildSchemaDigest(schemaOrModel: ZodSchema | Model<any>): string {
+    if (schemaOrModel instanceof Model) {
+      schemaOrModel = schemaOrModel.schema;
+    }
+
     let ops: CreateSchemaOptions;
-    const { components, schema: schemaObj } = createSchema(schema, {
+    const { components, schema: schemaObj } = createSchema(schemaOrModel, {
       componentRefPath: "#/definitions/",
     });
     console.log(schemaObj, components);
