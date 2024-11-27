@@ -19,10 +19,8 @@ describe("Model", () => {
 
   it("should build a schema digest", () => {
     const schema = z.object({ name: z.string(), age: z.number() });
-    const model = new Model(schema);
-
     const digestPattern = /^model:[a-f0-9]{64}$/;
-    expect(model.buildSchemaDigest()).toMatch(digestPattern);
+    expect(Model.buildSchemaDigest(schema)).toMatch(digestPattern);
   });
 
   it("should be compatible with python model digest", () => {
@@ -40,8 +38,7 @@ describe("Model", () => {
     const TARGET_DIGEST =
       "model:21e34819ee8106722968c39fdafc104bab0866f1c73c71fd4d2475be285605e9";
 
-    const model = new Model(schema);
-    expect(model.buildSchemaDigest()).toEqual(TARGET_DIGEST);
+    expect(Model.buildSchemaDigest(schema)).toEqual(TARGET_DIGEST);
   });
 
   it("nested models should be compatible with python model digest", () => {
@@ -105,8 +102,7 @@ describe("Model", () => {
     );
 
     // verify digest matches
-    const model = new Model(UAgentResponse);
-    expect(model.buildSchemaDigest()).toEqual(NESTED_TARGET_DIGEST);
+    expect(Model.buildSchemaDigest(UAgentResponse)).toEqual(NESTED_TARGET_DIGEST);
   });
 
   it("should throw an error for invalid constructor argument", () => {
