@@ -148,7 +148,7 @@ async function getAgentAddress(name: string, test: boolean): Promise<string | nu
 
 	const nameServiceContract = await getNameServiceContract(test);
 	const result = await nameServiceContract.queryContract(queryMsg);
-	
+
 	if (!result) {
 		log(`Failed to get NameService contract for ${test ? 'testnet' : 'mainnet'}`);
     throw new Error(`Failed to get NameService contract for ${test ? 'testnet' : 'mainnet'}`);
@@ -332,5 +332,6 @@ export {
   NameServiceResolver,
   GlobalResolver,
 	Resolver,
-  RulesBasedResolver
+  RulesBasedResolver,
+	parseIdentifier
 }
